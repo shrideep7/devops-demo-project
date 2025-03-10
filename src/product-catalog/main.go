@@ -9,11 +9,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"net"
 	"os"
 	"os/signal"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -23,26 +21,20 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 
 	otelhooks "github.com/open-feature/go-sdk-contrib/hooks/open-telemetry/pkg"
 	flagd "github.com/open-feature/go-sdk-contrib/providers/flagd/pkg"
 	"github.com/open-feature/go-sdk/openfeature"
 	pb "github.com/opentelemetry/opentelemetry-demo/src/product-catalog/genproto/oteldemo"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -63,8 +55,38 @@ func init() {
 	}
 }
 
+// Placeholder for reading product files
+func readProductFiles() ([]*pb.Product, error) {
+	log.Info("Reading product files...")
+	// TODO: Implement actual file reading logic
+	return []*pb.Product{}, nil
+}
+
+// Placeholder for initializing tracer provider
+func initTracerProvider() *sdktrace.TracerProvider {
+	log.Info("Initializing Tracer Provider...")
+	// TODO: Implement actual tracer initialization
+	return sdktrace.NewTracerProvider()
+}
+
+// Placeholder for initializing meter provider
+func initMeterProvider() *sdkmetric.MeterProvider {
+	log.Info("Initializing Meter Provider...")
+	// TODO: Implement actual meter initialization
+	return sdkmetric.NewMeterProvider()
+}
+
+// Placeholder for mapping environment variables
+func mustMapEnv(target *string, envKey string) {
+	value := os.Getenv(envKey)
+	if value == "" {
+		log.Fatalf("Environment variable %s is not set", envKey)
+	}
+	*target = value
+}
+
 func main() {
-	log.Info("Ending product catalog system") // Added logging statement
+	log.Info("Starting product catalog service")
 
 	tp := initTracerProvider()
 	defer func() {
@@ -81,6 +103,7 @@ func main() {
 		}
 		log.Println("Shutdown meter provider")
 	}()
+
 	openfeature.AddHooks(otelhooks.NewTracesHook())
 	err := openfeature.SetProvider(flagd.NewProvider())
 	if err != nil {
